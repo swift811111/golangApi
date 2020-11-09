@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -27,6 +27,11 @@ func main() {
 	router.Run(":8080")
 }
 
+type Response struct {
+	StatusCode int
+	Msg        string
+}
+
 // 取得全部資料
 func Get(c *gin.Context) {
 	c.JSON(http.StatusOK, Data)
@@ -34,15 +39,14 @@ func Get(c *gin.Context) {
 
 // 取得單一筆資料
 func GetOne(c *gin.Context) {
-	id := c.Param("id")
-	intID, _ := strconv.Atoi(id)
+	intID, _ := strconv.Atoi(c.Param("id"))
 	key, ok := exsistID(Data, intID)
 	if ok {
 		c.JSON(http.StatusOK, Data[key])
 	} else {
 		err := errors.New("沒有該筆資料")
-		fmt.Printf("err: %#+v\n", err)
-		c.JSON(http.StatusForbidden, &err)
+		log.Printf("err: %#+v\n", err)
+		c.JSON(http.StatusForbidden, Response{http.StatusForbidden, "沒有該筆資料"})
 	}
 }
 
@@ -50,9 +54,9 @@ func GetOne(c *gin.Context) {
 func Post(c *gin.Context) {
 	decoder := json.NewDecoder(c.Request.Body)
 	var addRole Role
-	err1 := decoder.Decode(&addRole)
-	if err1 != nil {
-		panic(err1)
+	err := decoder.Decode(&addRole)
+	if err != nil {
+		panic(err)
 	}
 	addRole.ID = Data[len(Data)-1].ID + 1
 	Data = append(Data, addRole)
@@ -67,8 +71,7 @@ type RoleVM struct {
 
 // 更新資料, 更新角色名稱與介紹
 func Put(c *gin.Context) {
-	id := c.Param("id")
-	updateID, _ := strconv.Atoi(id)
+	updateID, _ := strconv.Atoi(c.Param("id"))
 
 	decoder := json.NewDecoder(c.Request.Body)
 	var modfyRole Role
@@ -83,23 +86,24 @@ func Put(c *gin.Context) {
 		Data[key].Summary = modfyRole.Summary
 		c.JSON(http.StatusOK, Data[key])
 	} else {
-		// err := errors.New("沒有該筆資料")
-		c.JSON(http.StatusFound, "沒有該筆資料")
+		err := errors.New("沒有該筆資料")
+		log.Printf("err: %#+v\n", err)
+		c.JSON(http.StatusForbidden, Response{http.StatusForbidden, "沒有該筆資料"})
 	}
 }
 
 // 刪除資料
 func Delete(c *gin.Context) {
-	id := c.Param("id")
-	delID, _ := strconv.Atoi(id)
+	delID, _ := strconv.Atoi(c.Param("id"))
 
 	key, ok := exsistID(Data, delID)
 	if ok {
 		Data = append(Data[:key], Data[key+1:]...)
 		c.JSON(http.StatusOK, Data)
 	} else {
-		// err := errors.New("沒有該筆資料")
-		c.JSON(http.StatusFound, "沒有該筆資料")
+		err := errors.New("沒有該筆資料")
+		log.Printf("err: %#+v\n", err)
+		c.JSON(http.StatusForbidden, Response{http.StatusForbidden, "沒有該筆資料"})
 	}
 }
 

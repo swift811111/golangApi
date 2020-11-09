@@ -29,12 +29,12 @@ func main() {
 
 type Response struct {
 	StatusCode int
-	Msg        string
+	Msg        interface{}
 }
 
 // 取得全部資料
 func Get(c *gin.Context) {
-	c.JSON(http.StatusOK, Data)
+	c.JSON(http.StatusOK, Response{http.StatusOK, Data})
 }
 
 // 取得單一筆資料
@@ -42,7 +42,7 @@ func GetOne(c *gin.Context) {
 	intID, _ := strconv.Atoi(c.Param("id"))
 	key, ok := exsistID(Data, intID)
 	if ok {
-		c.JSON(http.StatusOK, Data[key])
+		c.JSON(http.StatusOK, Response{http.StatusOK, Data[key]})
 	} else {
 		err := errors.New("沒有該筆資料")
 		log.Printf("err: %#+v\n", err)
@@ -60,7 +60,7 @@ func Post(c *gin.Context) {
 	}
 	addRole.ID = Data[len(Data)-1].ID + 1
 	Data = append(Data, addRole)
-	c.JSON(http.StatusOK, addRole)
+	c.JSON(http.StatusOK, Response{http.StatusOK, addRole})
 }
 
 type RoleVM struct {
@@ -84,7 +84,7 @@ func Put(c *gin.Context) {
 	if ok {
 		Data[key].Name = modfyRole.Name
 		Data[key].Summary = modfyRole.Summary
-		c.JSON(http.StatusOK, Data[key])
+		c.JSON(http.StatusOK, Response{http.StatusOK, Data[key]})
 	} else {
 		err := errors.New("沒有該筆資料")
 		log.Printf("err: %#+v\n", err)
@@ -99,7 +99,7 @@ func Delete(c *gin.Context) {
 	key, ok := exsistID(Data, delID)
 	if ok {
 		Data = append(Data[:key], Data[key+1:]...)
-		c.JSON(http.StatusOK, Data)
+		c.JSON(http.StatusOK, Response{http.StatusOK, Data})
 	} else {
 		err := errors.New("沒有該筆資料")
 		log.Printf("err: %#+v\n", err)

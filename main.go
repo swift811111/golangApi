@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"log"
 	"net/http"
@@ -46,15 +45,14 @@ func GetOne(c *gin.Context) {
 	} else {
 		err := errors.New("沒有該筆資料")
 		log.Printf("err: %#+v\n", err)
-		c.JSON(http.StatusForbidden, Response{http.StatusForbidden, "沒有該筆資料"})
+		c.JSON(http.StatusNoContent, "")
 	}
 }
 
 // 新增資料
 func Post(c *gin.Context) {
-	decoder := json.NewDecoder(c.Request.Body)
 	var addRole Role
-	err := decoder.Decode(&addRole)
+	err := c.ShouldBind(&addRole)
 	if err != nil {
 		panic(err)
 	}
@@ -73,9 +71,8 @@ type RoleVM struct {
 func Put(c *gin.Context) {
 	updateID, _ := strconv.Atoi(c.Param("id"))
 
-	decoder := json.NewDecoder(c.Request.Body)
 	var modfyRole Role
-	err := decoder.Decode(&modfyRole)
+	err := c.ShouldBind(&modfyRole)
 	if err != nil {
 		panic(err)
 	}
@@ -88,7 +85,7 @@ func Put(c *gin.Context) {
 	} else {
 		err := errors.New("沒有該筆資料")
 		log.Printf("err: %#+v\n", err)
-		c.JSON(http.StatusForbidden, Response{http.StatusForbidden, "沒有該筆資料"})
+		c.JSON(http.StatusNoContent, "")
 	}
 }
 
@@ -103,7 +100,7 @@ func Delete(c *gin.Context) {
 	} else {
 		err := errors.New("沒有該筆資料")
 		log.Printf("err: %#+v\n", err)
-		c.JSON(http.StatusForbidden, Response{http.StatusForbidden, "沒有該筆資料"})
+		c.JSON(http.StatusNoContent, "")
 	}
 }
 
